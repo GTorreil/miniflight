@@ -12,3 +12,6 @@ VBat - 10k - 13k - GND
  
 U(bat) = U(mes) * 1.75
 
+## Notes diverses
+
+- J'ai fait des essais de tension minimale sur le EP1 Rx : la liaison coupe à 1.8V, et elle est parfaitement stable à 2.25V avec une portée qui semble similaire à celle à 5V. Il n'y a donc aucun risque de couper la liaison même avec une batterie bien déchargée.
