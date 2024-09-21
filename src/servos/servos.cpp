@@ -10,7 +10,7 @@ void servos_init()
     servo_aileron.setPeriodHertz(50);
     servo_aileron.attach(PIN_SERVO_AILERON);
     servo_elevator.setPeriodHertz(50);
-    servo_elevator.attach(PIN_SERVO_AILERON);
+    servo_elevator.attach(PIN_SERVO_ELEVATOR);
 }
 
 void servos_aileron_set_usec(uint16_t usec)
