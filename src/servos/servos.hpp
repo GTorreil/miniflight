@@ -8,5 +8,6 @@
 void servos_init();
 void servos_aileron_set_usec(uint16_t usec); 
 void servos_elevator_set_usec(uint16_t usec);
+void servos_esc_set_usec(uint16_t usec);
 
 #endif

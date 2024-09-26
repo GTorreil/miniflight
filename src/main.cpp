@@ -6,7 +6,10 @@
 #include "CRSFforArduino.hpp"
 #include "battery/battery.hpp"
 #include "servos/servos.hpp"
+
+#ifdef USE_DC_MOTOR
 #include "dc_motor/dc_motor.hpp"
+#endif
 
 CRSFforArduino *crsf = nullptr;
 
@@ -17,7 +20,7 @@ void set_failsafe_values()
 {
   servos_aileron_set_usec(FAILSAFE_AILERON_POSITION);
   servos_elevator_set_usec(FAILSAFE_ELEVATOR_POSITION);
-  dc_motor_set_power_100(FAILSAFE_THROTTLE);
+  servos_esc_set_usec(FAILSAFE_THROTTLE);
 }
 
 void setup()
@@ -55,7 +58,6 @@ void setup()
 
   battery_init();
   servos_init();
-  dc_motor_init();
 
   // Écrire les valeurs failsafe aux différentes sorties
   set_failsafe_values();
@@ -136,9 +138,10 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcChannels)
 
     servos_aileron_set_usec(crsf->rcToUs(rcChannels->value[0]));
     servos_elevator_set_usec(crsf->rcToUs(rcChannels->value[1]));
+    servos_esc_set_usec(crsf->rcToUs(rcChannels->value[2]));
 
-    const uint8_t motor_power = map(crsf->rcToUs(rcChannels->value[2]), 990, 2010, 0, 100);
-    dc_motor_set_power_100(motor_power);
+    // const uint8_t motor_power = map(crsf->rcToUs(rcChannels->value[2]), 990, 2010, 0, 100);
+    // dc_motor_set_power_100(motor_power);
     // Serial.println(motor_power);
   }
   else

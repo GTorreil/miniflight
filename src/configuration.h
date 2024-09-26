@@ -7,19 +7,15 @@
 #define VBAT_LOOPS_BETWEEN_UPDATES 1000
 
 // 
-// Moteur DC
-// 
-#define PIN_MOTOR_PWM 4
-
-// 
 // SERVOS
 // 
 #define PIN_SERVO_AILERON 1
 #define PIN_SERVO_ELEVATOR 2
+#define BRUSHLESS_ESC_PIN 4
 
 // 
 // FAILSAFE
 // 
 #define FAILSAFE_AILERON_POSITION 1500 // uSec
 #define FAILSAFE_ELEVATOR_POSITION 1500 // uSec
-#define FAILSAFE_THROTTLE 0 // 0-100
+#define FAILSAFE_THROTTLE 990 // uSec
