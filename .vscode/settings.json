@@ -1,7 +1,9 @@
 {
-    "cSpell.language": "en,fr",
+    "cSpell.language": "en",
     "cSpell.words": [
         "crsf",
+        "endregion",
         "VBAT"
-    ]
+    ],
+    "editor.formatOnSave": true
 }
