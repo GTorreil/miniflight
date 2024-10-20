@@ -64,9 +64,9 @@ uint8_t norm_to_usec(float norm)
 
 void set_outputs()
 {
-  servos_aileron_set_usec(norm_to_usec(mixer_output->roll));
-  servos_elevator_set_usec(norm_to_usec(mixer_output->pitch));
-  servos_esc_set_usec(norm_to_usec(mixer_output->throttle));
+  servos_aileron_set_usec(norm_to_usec(mixer_output.aileron));
+  servos_elevator_set_usec(norm_to_usec(mixer_output.elevator));
+  servos_esc_set_usec(norm_to_usec(mixer_output.throttle));
 }
 
 void loop()

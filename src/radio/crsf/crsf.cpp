@@ -74,7 +74,6 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcChannelsCrsf)
         rcChannels.roll = rc_to_normalized(FAILSAFE_THROTTLE);
         rcChannels.throttle = rc_to_normalized(FAILSAFE_THROTTLE);
 
-        // For the
         rcChannels.aux1 = rc_to_normalized(FAILSAFE_AUX1);
         rcChannels.aux2 = rc_to_normalized(FAILSAFE_AUX2);
         rcChannels.aux3 = rc_to_normalized(FAILSAFE_AUX3);
