@@ -1,25 +1,25 @@
 
-// Pin de mesure de la tension de la batterie.
+// Battery measurement pin.
 #define PIN_VBAT A1
-// Facteur appliqué à la tension brute. Calculez-le à partir du pont diviseur.
+// Voltage divider factor. Calculate it from the voltage divider.
 #define VBAT_MULTIPLIER 2
-// Nombre de boucles entre deux mises à jour de la tension de la batterie.
+// Number of loops between two battery voltage updates.
 #define VBAT_LOOPS_BETWEEN_UPDATES 1000
 
-// 
+//
 // SERVOS
-// 
-#define PIN_SERVO_AILERON 1
-#define PIN_SERVO_ELEVATOR 2
+//
 #define BRUSHLESS_ESC_PIN 4
+#define PIN_SERVO_ELEVATOR 2
+#define PIN_SERVO_AILERON 0
 
-// 
+//
 // FAILSAFE
-// 
-#define FAILSAFE_AILERON_POSITION 1500 // uSec
-#define FAILSAFE_ELEVATOR_POSITION 1500 // uSec
-#define FAILSAFE_THROTTLE 990 // uSec
-#define FAILSAFE_AUX1 1500 // uSec
-#define FAILSAFE_AUX2 1500 // uSec
-#define FAILSAFE_AUX3 1500 // uSec
-#define FAILSAFE_AUX4 1500 // uSec
+//
+#define FAILSAFE_AILERON_POSITION 90  // Servo degrees
+#define FAILSAFE_ELEVATOR_POSITION 90 // Servo degrees
+#define FAILSAFE_THROTTLE 0           // Servo degrees
+#define FAILSAFE_AUX1 90              // Servo degrees
+#define FAILSAFE_AUX2 90              // Servo degrees
+#define FAILSAFE_AUX3 90              // Servo degrees
+#define FAILSAFE_AUX4 90              // Servo degrees

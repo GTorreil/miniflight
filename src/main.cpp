@@ -9,14 +9,6 @@
 #include "servos/servos.hpp"
 #include "radio/crsf/crsf.hpp"
 
-/** Set outputs to failsafe values */
-void set_failsafe_values()
-{
-  servos_aileron_set_usec(FAILSAFE_AILERON_POSITION);
-  servos_elevator_set_usec(FAILSAFE_ELEVATOR_POSITION);
-  servos_esc_set_usec(FAILSAFE_THROTTLE);
-}
-
 void setup()
 {
   Serial.begin(115200);
@@ -30,6 +22,8 @@ void setup()
   servos_init();
 
   crsf_init();
+
+  imu_init();
 
   Serial.println("Setup done");
 }
@@ -57,16 +51,17 @@ void mixer()
 
 #pragma endregion
 
-uint8_t norm_to_usec(float norm)
+/** Convert a normalized value to an angle (0 to 180 degrees) */
+uint8_t norm_to_angle(float norm)
 {
-  return map(norm, -1.0f, 1.0f, 1000, 2000);
+  return (uint8_t)(90.0f + norm * 90.0f);
 }
 
 void set_outputs()
 {
-  servos_aileron_set_usec(norm_to_usec(mixer_output.aileron));
-  servos_elevator_set_usec(norm_to_usec(mixer_output.elevator));
-  servos_esc_set_usec(norm_to_usec(mixer_output.throttle));
+  servos_aileron_set_angle(norm_to_angle(mixer_output.aileron));
+  servos_elevator_set_angle(norm_to_angle(mixer_output.elevator));
+  servos_esc_set_angle(norm_to_angle(mixer_output.throttle));
 }
 
 void loop()

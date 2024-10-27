@@ -1,31 +1,41 @@
 #include "servos.hpp"
 
-Servo servo_aileron;
-Servo servo_elevator;
-Servo servo_esc;
+Pwm pwm = Pwm();
 
 void servos_init()
 {
-    servo_aileron.setPeriodHertz(50);
-    servo_aileron.attach(PIN_SERVO_AILERON);
-    
-    servo_elevator.setPeriodHertz(50);
-    servo_elevator.attach(PIN_SERVO_ELEVATOR);
 
-    servo_esc.setPeriodHertz(50);
-    servo_esc.attach(BRUSHLESS_ESC_PIN);
+    // Write failsafe values
+    servos_aileron_set_angle(FAILSAFE_AILERON_POSITION);
+    servos_elevator_set_angle(FAILSAFE_ELEVATOR_POSITION);
+    servos_esc_set_angle(FAILSAFE_THROTTLE);
 }
 
-void servos_aileron_set_usec(uint16_t usec)
+void servos_aileron_set_angle(uint8_t angle)
 {
-    servo_aileron.writeMicroseconds(usec);
+    pwm.writeServo(PIN_SERVO_AILERON, angle);
 }
 
-void servos_elevator_set_usec(uint16_t usec)
+void servos_elevator_set_angle(uint8_t angle)
 {
-    servo_elevator.writeMicroseconds(usec);
+    pwm.writeServo(PIN_SERVO_ELEVATOR, angle);
 }
 
-void servos_esc_set_usec(uint16_t usec){
-    servo_esc.writeMicroseconds(usec);
+void servos_esc_set_angle(uint8_t angle)
+{
+
+    // Clamp the value
+    if (angle > 180)
+    {
+        angle = 180;
+    }
+    else if (angle < 40)
+    {
+        angle = 40;
+    }
+
+    Serial.print("ESC angle: ");
+    Serial.println(angle);
+
+    pwm.writeServo(BRUSHLESS_ESC_PIN, angle);
 }

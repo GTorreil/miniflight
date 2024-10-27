@@ -5,7 +5,6 @@
 #include "configuration.h"
 #include <CRSFforArduino.hpp>
 
-
 typedef struct
 {
     bool failsafe;
