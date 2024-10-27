@@ -34,8 +34,5 @@ void servos_esc_set_angle(uint8_t angle)
         angle = 40;
     }
 
-    Serial.print("ESC angle: ");
-    Serial.println(angle);
-
     pwm.writeServo(BRUSHLESS_ESC_PIN, angle);
 }

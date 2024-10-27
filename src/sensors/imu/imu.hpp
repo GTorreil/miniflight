@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "configuration.h"
+#include "Wire.h"
 #include <MPU6050_light.h>
 
 void imu_init();

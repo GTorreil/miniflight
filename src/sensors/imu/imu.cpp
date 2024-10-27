@@ -6,10 +6,9 @@ bool imu_initialized = false;
 
 void imu_init()
 {
-    Wire.begin();
+    Wire.begin(8, 9);
 
     uint8_t retries = 0;
-
     byte status = mpu.begin();
     while (status != 0)
     {
