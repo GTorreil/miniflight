@@ -8,7 +8,8 @@
 
 void imu_init();
 void imu_loop();
-void imu_get_accel(float *x, float *y, float *z);
-void imu_get_gyro(float *yaw, float *pitch, float *roll);
+void imu_get_angles(float *yaw, float *pitch, float *roll);
+
+bool imu_available();
 
 #endif

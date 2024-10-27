@@ -46,34 +46,21 @@ void imu_loop()
     mpu.update();
 }
 
-void imu_get_accel(float *x, float *y, float *z)
+void imu_get_angles(float *yaw, float *pitch, float *roll)
 {
     if (!imu_initialized)
     {
-        *x = 0;
-        *y = 0;
-        *z = 0;
-    }
-    else
-    {
-        *x = mpu.getAccX();
-        *y = mpu.getAccY();
-        *z = mpu.getAccZ();
-    }
-}
-
-void imu_get_gyro(float *yaw, float *pitch, float *roll)
-{
-    if (!imu_initialized)
-    {
-        *yaw = 0;
-        *pitch = 0;
-        *roll = 0;
+        return;
     }
     else
     {
         *yaw = mpu.getAngleZ();
-        *pitch = mpu.getAngleY();
-        *roll = mpu.getAngleX();
+        *pitch = mpu.getAngleX();
+        *roll = mpu.getAngleY();
     }
+}
+
+bool imu_available()
+{
+    return imu_initialized;
 }
