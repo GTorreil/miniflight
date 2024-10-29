@@ -5,15 +5,16 @@ This is a simple wing flight controller based on ESP32-C3 and a CRSF-compatible 
 For stabilized flight, an MPU6050 is required. Stabilization features are automatically enabled if the gyro is detected. If there is no gyro, the flight controller still works, but with stabilization features disabled.
 
 Current Features:
-- CSRF Demux : unpack RC channels and send them to the servos
-- Rate stabilization : Gyro stabilization
+- CRSF Demux : unpack RC channels and send them to the servos/ESCs
+- Rate stabilization : rate-mode Gyro stabilization
 
-Wishlist features:
+Feature wishlist:
 - Stabilized attitude control
-- Telemetry (VBat)
+- Telemetry (VBat) (currently not working)
 
 ## Hardware
 - ESP32-C3 board : https://s.click.aliexpress.com/e/_DBJMH69
+- MPU6050 module : https://s.click.aliexpress.com/e/_EuXEx1B
 - Voltage divider : TODO
 
 ## Notes
