@@ -9,7 +9,7 @@ Current Features:
 - Rate stabilization : rate-mode Gyro stabilization
 
 Feature wishlist:
-- Stabilized attitude control
+- Stabilized attitude control (fly by wire)
 - Telemetry (VBat) (currently not working)
 
 ## Hardware
