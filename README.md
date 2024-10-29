@@ -7,6 +7,7 @@ For stabilized flight, an MPU6050 is required. Stabilization features are automa
 Current Features:
 - CRSF Demux : unpack RC channels and send them to the servos/ESCs
 - Rate stabilization : rate-mode Gyro stabilization
+- Failsafe : apply default values to outputs if radio signal is lost
 
 Feature wishlist:
 - Stabilized attitude control (fly by wire)
