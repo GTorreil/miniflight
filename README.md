@@ -1,6 +1,6 @@
 # Miniflight
 
-This is a simple wing flight controller based on ESP32-C3 and a CRSF-compatible radio. It was designed to be small, simple and cheap for a mini-airplane. 
+Miniflight is a simple wing flight controller based on ESP32-C3 and a CRSF-compatible radio. It was designed to be small, simple and cheap for a mini-airplane. 
 
 For stabilized flight, an MPU6050 is required. Stabilization features are automatically enabled if the gyro is detected. If there is no gyro, the flight controller still works, but with stabilization features disabled.
 
