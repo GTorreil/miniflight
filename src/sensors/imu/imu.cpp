@@ -8,6 +8,7 @@ bool imu_ready = false; // indicates if the IMU is ready to be used
 uint8_t dev_status = 0; // status after each device operation (0 = success, !0 = error)
 
 volatile bool interrupt_available = false;
+bool new_data = false; // Indicates if there is new, unread data available.
 
 void interrupt_handler()
 {
@@ -23,7 +24,6 @@ uint8_t fifoBuffer[64]; // FIFO storage buffer
 Quaternion q;
 VectorFloat gravity;
 float ypr[3];
-float ypr_deg[3];
 
 void i2c_init()
 {
@@ -51,12 +51,6 @@ void imu_init()
 
     // load and configure the DMP
     dev_status = mpu.dmpInitialize();
-
-    // supply your own gyro offsets here, scaled for min sensitivity
-    // mpu.setXGyroOffset(220);
-    // mpu.setYGyroOffset(76);
-    // mpu.setZGyroOffset(-85);
-    // mpu.setZAccelOffset(1788); // 1688 factory default for my test chip
 
     // make sure it worked (returns 0 if so)
     if (dev_status == 0)
@@ -137,13 +131,13 @@ void imu_loop()
         // Convert the quaternion to Euler angles
         mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
 
-        // Convert the angles to degrees
-        ypr_deg[0] = ypr[0] * 180.0 / M_PI;
-        ypr_deg[1] = ypr[1] * 180.0 / M_PI;
-        ypr_deg[2] = ypr[2] * 180.0 / M_PI;
+        new_data = true;
     }
 }
 
+/**
+ * Get the aircraft's attitude. Angles are in radians.
+ */
 void imu_get_attitude(float *yaw, float *pitch, float *roll)
 {
     if (!imu_available)
@@ -152,13 +146,20 @@ void imu_get_attitude(float *yaw, float *pitch, float *roll)
     }
     else
     {
-        *yaw = ypr_deg[0];
-        *pitch = ypr_deg[1];
-        *roll = ypr_deg[2];
+        *yaw = ypr[0];
+        *pitch = ypr[1];
+        *roll = ypr[2];
+
+        new_data = false;
     }
 }
 
 bool imu_available()
 {
     return imu_ready;
+}
+
+bool imu_has_new_data()
+{
+    return new_data;
 }

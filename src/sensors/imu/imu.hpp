@@ -10,5 +10,6 @@ void imu_loop();
 void imu_get_attitude(float *yaw, float *pitch, float *roll);
 
 bool imu_available();
+bool imu_has_new_data();
 
 #endif

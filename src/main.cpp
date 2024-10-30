@@ -8,6 +8,8 @@
 #include "sensors/battery/battery.hpp"
 #include "servos/servos.hpp"
 #include "radio/crsf/crsf.hpp"
+#include "utils/angles/angles.hpp"
+#include "utils/filters/filters.hpp"
 
 void setup()
 {
@@ -29,58 +31,107 @@ void setup()
 
 #pragma region mixer
 
-typedef struct
-{
-  float aileron;
-  float elevator;
-  float throttle;
-} mixer_result_t;
+// Angular speeds
+float angular_speed_roll = 0;  // radians per second
+float angular_speed_pitch = 0; // radians per second
+float angular_speed_yaw = 0;   // radians per second
 
-mixer_result_t mixer_output;
+float last_angle_roll = 0;  // radians
+float last_angle_pitch = 0; // radians
+float last_angle_yaw = 0;   // radians
+
+// Define configurable variables for the rate of change of angles
+#define ROLL_RATE_DEG 180.0f // degrees per second
+#define PITCH_RATE_DEG 90.0f // degrees per second
+#define YAW_RATE_DEG 20.0f   // degrees per second
+
+#define ROLL_RATE_RAD (ROLL_RATE_DEG * M_PI / 180.0f)
+#define PITCH_RATE_RAD (PITCH_RATE_DEG * M_PI / 180.0f)
+#define YAW_RATE_RAD (YAW_RATE_DEG * M_PI / 180.0f)
+
+#pragma region delta_time
 
 unsigned long last_loop_time = 0; // last loop time in milliseconds
 float loop_delta_s = 0;           // delta time in seconds
 
-float angular_speed_roll = 0;  // degrees per second
-float angular_speed_pitch = 0; // degrees per second
-float angular_speed_yaw = 0;   // degrees per second
-
-float last_angle_roll = 0;  // degrees
-float last_angle_pitch = 0; // degrees
-float last_angle_yaw = 0;   // degrees
-
-float target_angular_speed_roll = 0;  // degrees per second
-float target_angular_speed_pitch = 0; // degrees per second
-float target_angular_speed_yaw = 0;   // degrees per second
-
-float error_angular_speed_roll = 0;  // degrees per second
-float error_angular_speed_pitch = 0; // degrees per second
-float error_angular_speed_yaw = 0;   // degrees per second
-
-// Define configurable variables for the rate of change of angles
-#define ROLL_RATE 180.0f // degrees per second
-#define PITCH_RATE 90.0f // degrees per second
-#define YAW_RATE 20.0f   // degrees per second
-
-void update_target_angles()
+void update_delta_time()
 {
-  rcChannelsNorm_t *rcChannels = crsf_get_rc_channels_norm();
+  // Compute the delta time
+  const unsigned long now = millis();
+  loop_delta_s = (now - last_loop_time) / 1000.0f;
+  last_loop_time = now;
+}
 
-  // Calculate target angular rates based on RC input
-  target_angular_speed_roll = rcChannels->roll * ROLL_RATE;
-  target_angular_speed_pitch = rcChannels->pitch * PITCH_RATE;
-  target_angular_speed_yaw = rcChannels->yaw * YAW_RATE;
+#pragma endregion
 
+#pragma region radio
+
+float rc_throttle, rc_roll, rc_pitch, rc_yaw, rc_aux1, rc_aux2, rc_aux3, rc_aux4, rc_failsafe;
+
+void radio_loop()
+{
+  crsf_loop();
+  const rcChannelsNorm_t *rcChannels = crsf_get_rc_channels_norm();
+
+  rc_throttle = rcChannels->throttle;
+  rc_roll = rcChannels->roll;
+  rc_pitch = rcChannels->pitch;
+  rc_yaw = rcChannels->yaw;
+  rc_aux1 = rcChannels->aux1;
+  rc_aux2 = rcChannels->aux2;
+  rc_aux3 = rcChannels->aux3;
+  rc_aux4 = rcChannels->aux4;
+  rc_failsafe = rcChannels->failsafe;
+}
+#pragma endregion
+
+#pragma region imu
+
+float current_angle_roll,
+    current_angle_pitch, current_angle_yaw; // Radians
+
+void read_imu()
+{
   // Calculate the current angular rates
-  float current_angle_roll = 0;
-  float current_angle_pitch = 0;
-  float current_angle_yaw = 0;
-  imu_get_attitude(&current_angle_yaw, &current_angle_pitch, &current_angle_roll);
+  float imu_roll, imu_pitch, imu_yaw; // Radians
+  imu_get_attitude(&imu_yaw, &imu_pitch, &imu_roll);
+
+  const float unwrapped_roll = unwrap_angle(imu_roll, current_angle_roll);
+  const float unwrapped_pitch = unwrap_angle(imu_pitch, current_angle_pitch);
+  const float unwrapped_yaw = unwrap_angle(imu_yaw, current_angle_yaw);
+
+  // Assign the new values to the current angles.
+  // Note that the roll and pitch angles are swapped to account for the IMU's orientation.
+  current_angle_yaw = unwrapped_yaw;
+  current_angle_pitch = unwrapped_roll;
+  current_angle_roll = unwrapped_pitch;
+}
+
+#pragma endregion
+
+#pragma region rates
+float target_angular_speed_roll, target_angular_speed_pitch, target_angular_speed_yaw; // radians per second
+
+void update_rates()
+{
+  // Calculate target angular rates based on RC input
+  target_angular_speed_roll = rc_roll * ROLL_RATE_RAD;
+  target_angular_speed_pitch = rc_pitch * PITCH_RATE_RAD;
+  target_angular_speed_yaw = rc_yaw * YAW_RATE_RAD;
+}
+#pragma endregion
+
+#pragma region rates_error
+
+float error_rate_roll, error_rate_pitch, error_rate_yaw; // radians per second
+
+void update_rates_error()
+{
   angular_speed_roll = (current_angle_roll - last_angle_roll) / loop_delta_s;
   angular_speed_pitch = (current_angle_pitch - last_angle_pitch) / loop_delta_s;
   angular_speed_yaw = (current_angle_yaw - last_angle_yaw) / loop_delta_s;
 
-  // Serial.println(current_angle_roll);
+  // Serial.printf("roll %f/%f, pitch %f/%f, yaw %f/%f\n", angular_speed_roll, target_angular_speed_roll, angular_speed_pitch, target_angular_speed_pitch, angular_speed_yaw, target_angular_speed_yaw);
 
   // Note the current angles as the old ones
   last_angle_roll = current_angle_roll;
@@ -88,10 +139,12 @@ void update_target_angles()
   last_angle_yaw = current_angle_yaw;
 
   // Calculate the error
-  error_angular_speed_roll = target_angular_speed_roll - angular_speed_roll;
-  error_angular_speed_pitch = target_angular_speed_pitch - angular_speed_pitch;
-  error_angular_speed_yaw = target_angular_speed_yaw - angular_speed_yaw;
+  error_rate_roll = target_angular_speed_roll - angular_speed_roll;
+  error_rate_pitch = target_angular_speed_pitch - angular_speed_pitch;
+  error_rate_yaw = target_angular_speed_yaw - angular_speed_yaw;
 }
+
+#pragma endregion
 
 #define ROLL_P 0.5f
 #define PITCH_P 0.5f
@@ -99,109 +152,83 @@ void update_target_angles()
 
 #define LPF_ALPHA 0.1f
 
-/**
- * Applies a low-pass filter to smooth a signal by blending the new input value with the previous filtered value.
- *
- * @param new_value The latest input value to be filtered (e.g., a new sensor reading).
- * @param prev_value The previous filtered value, which acts as the "state" of the filter.
- * @param alpha A smoothing factor between 0.0 and 1.0 that controls the filter's sensitivity:
- *              - Values close to 1.0 make the filter more responsive to new input values (less smoothing).
- *              - Values close to 0.0 make the filter less responsive to changes, providing more smoothing.
- *              - Typical values for alpha range from 0.1 (strong smoothing) to 0.5 (mild smoothing).
- *
- * @return The new filtered value, which combines the previous state with the new input based on `alpha`.
- *
- * Example usage:
- * float filtered_value = low_pass_filter(new_sensor_value, previous_filtered_value, 0.3f);
- */
-float low_pass_filter(float new_value, float prev_value, float alpha)
-{
-  return alpha * new_value + (1.0f - alpha) * prev_value;
-}
+float mix_out_aileron, mix_out_elevator, mix_out_throttle;
 
 void mixer()
 {
-  rcChannelsNorm_t *rcChannels = crsf_get_rc_channels_norm();
 
   if (imu_available())
   {
 
     // If stabilization is disabled, we assign RC channels directly.
-    if (rcChannels->aux2 < -0.1f)
+    if (rc_aux2 < -0.1f)
     {
-      mixer_output.aileron = rcChannels->roll;
-      mixer_output.elevator = rcChannels->pitch;
-      mixer_output.throttle = rcChannels->throttle;
+      mix_out_aileron = rc_roll;
+      mix_out_elevator = rc_pitch;
+      mix_out_throttle = rc_throttle;
       return;
     }
 
     // Normalize the errors so we can add them to the target angles
-    const float error_roll = error_angular_speed_roll / ROLL_RATE;
-    const float error_pitch = error_angular_speed_pitch / PITCH_RATE;
-    const float error_yaw = error_angular_speed_yaw / YAW_RATE;
+    const float error_roll = error_rate_roll / ROLL_RATE_RAD;
+    const float error_pitch = error_rate_pitch / PITCH_RATE_RAD;
+    const float error_yaw = error_rate_yaw / YAW_RATE_RAD;
 
     // Compute new mixer outputs
-    const float mix_out_aileron = rcChannels->roll + error_roll * ROLL_P;
-    const float mix_out_elevator = rcChannels->pitch + error_pitch * PITCH_P;
-    const float mix_out_throttle = rcChannels->throttle + error_yaw * YAW_P;
+    const float new_aileron = rc_roll + error_roll * ROLL_P;
+    const float new_elevator = rc_pitch + error_pitch * PITCH_P;
+    const float new_throttle = rc_throttle + error_yaw * YAW_P;
 
     // Blend the new mixer outputs with the old ones
-    mixer_output.aileron = low_pass_filter(mix_out_aileron, mixer_output.aileron, LPF_ALPHA);
-    mixer_output.elevator = low_pass_filter(mix_out_elevator, mixer_output.elevator, LPF_ALPHA);
-    mixer_output.throttle = rcChannels->throttle; // Pass the throttle as is
+    mix_out_aileron = low_pass_filter(new_aileron, mix_out_aileron, LPF_ALPHA);
+    mix_out_elevator = low_pass_filter(new_elevator, mix_out_elevator, LPF_ALPHA);
+    mix_out_throttle = rc_throttle; // Pass the throttle as is
   }
   else
   {
     // If we don't have an IMU, we can't stabilize the aircraft
     // so we just pass the RC channels directly.
 
-    mixer_output.aileron = rcChannels->roll;
-    mixer_output.elevator = rcChannels->pitch;
-    mixer_output.throttle = rcChannels->throttle;
+    mix_out_aileron = rc_roll;
+    mix_out_elevator = rc_pitch;
+    mix_out_throttle = rc_throttle;
     return;
   }
 }
 
-#pragma endregion
-
-/** Convert a normalized value to an angle (0 to 180 degrees) */
-uint8_t norm_to_angle(float norm)
-{
-  if (norm > 1.0f)
-  {
-    norm = 1.0f;
-  }
-  else if (norm < -1.0f)
-  {
-    norm = -1.0f;
-  }
-
-  return (uint8_t)(90.0f + norm * 90.0f);
-}
-
 void set_outputs()
 {
-  servos_aileron_set_angle(norm_to_angle(mixer_output.aileron));
-  servos_elevator_set_angle(norm_to_angle(mixer_output.elevator));
-  servos_esc_set_angle(norm_to_angle(mixer_output.throttle));
+
+  if (rc_failsafe)
+  {
+    servos_aileron_set_angle(FAILSAFE_AILERON_POSITION);
+    servos_elevator_set_angle(FAILSAFE_ELEVATOR_POSITION);
+    servos_esc_set_angle(FAILSAFE_THROTTLE);
+  }
+  else
+  {
+    servos_aileron_set_angle(norm_to_angle(mix_out_aileron));
+    servos_elevator_set_angle(norm_to_angle(mix_out_elevator));
+    servos_esc_set_angle(norm_to_angle(mix_out_throttle));
+  }
 }
 
 void loop()
 {
-  // Compute the delta time
-  const unsigned long now = millis();
-  loop_delta_s = (now - last_loop_time) / 1000.0f;
-  last_loop_time = now;
-
   // I/O Loop
-  crsf_loop();
+  radio_loop();
   battery_loop();
   imu_loop();
 
-  // Stabilization pipeline
-
-  // Update the target angles
-  update_target_angles();
+  if (imu_has_new_data())
+  {
+    // FC/Stabilization pipeline
+    update_delta_time();
+    update_rates();
+    read_imu();
+    update_rates_error();
+    update_rates();
+  }
 
   mixer();
   set_outputs();
