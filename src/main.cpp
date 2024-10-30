@@ -75,10 +75,12 @@ void update_target_angles()
   float current_angle_roll = 0;
   float current_angle_pitch = 0;
   float current_angle_yaw = 0;
-  imu_get_angles(&current_angle_yaw, &current_angle_pitch, &current_angle_roll);
+  imu_get_attitude(&current_angle_yaw, &current_angle_pitch, &current_angle_roll);
   angular_speed_roll = (current_angle_roll - last_angle_roll) / loop_delta_s;
   angular_speed_pitch = (current_angle_pitch - last_angle_pitch) / loop_delta_s;
   angular_speed_yaw = (current_angle_yaw - last_angle_yaw) / loop_delta_s;
+
+  // Serial.println(current_angle_roll);
 
   // Note the current angles as the old ones
   last_angle_roll = current_angle_roll;
@@ -123,8 +125,6 @@ void mixer()
 
   if (imu_available())
   {
-
-    Serial.println(rcChannels->aux2);
 
     // If stabilization is disabled, we assign RC channels directly.
     if (rcChannels->aux2 < -0.1f)

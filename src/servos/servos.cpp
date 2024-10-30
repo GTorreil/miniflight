@@ -60,5 +60,5 @@ void servos_esc_set_angle(uint8_t angle)
         angle = 40;
     }
 
-    pwm.writeServo(BRUSHLESS_ESC_PIN, angle);
+    pwm.writeServo(PIN_ESC_1, angle);
 }

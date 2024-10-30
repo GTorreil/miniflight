@@ -16,7 +16,7 @@ void read_battery()
     float raw_voltage = analogRead(PIN_VBAT) * 3.3 / 1024;
     bat_voltage = raw_voltage * VBAT_MULTIPLIER; // Facteur du diviseur de tension
     loops_since_bat_voltage_update = 0;
-    
+
     // Serial.print("Battery voltage: ");
     // Serial.println(bat_voltage);
 }

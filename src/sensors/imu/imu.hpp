@@ -4,11 +4,10 @@
 #include "Arduino.h"
 #include "configuration.h"
 #include "Wire.h"
-#include <MPU6050_light.h>
 
 void imu_init();
 void imu_loop();
-void imu_get_angles(float *yaw, float *pitch, float *roll);
+void imu_get_attitude(float *yaw, float *pitch, float *roll);
 
 bool imu_available();
 
