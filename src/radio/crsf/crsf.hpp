@@ -22,4 +22,6 @@ void crsf_init();
 void crsf_loop();
 rcChannelsNorm_t *crsf_get_rc_channels_norm();
 
+void telem_write_battery(float voltage);
+
 #endif

@@ -14,6 +14,12 @@
 #define PIN_SERVO_AILERON 0
 
 //
+// TELEMETRY
+//
+
+#define TELEMETRY_INTERVAL_MS 200 // ms
+
+//
 // FAILSAFE
 //
 #define FAILSAFE_AILERON_POSITION 90  // Servo degrees

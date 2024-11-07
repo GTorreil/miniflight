@@ -5,7 +5,6 @@
 #include "configuration.h"
 
 void battery_init();
-void battery_loop();
-float battery_get_voltage();
+float battery_read_voltage();
 
 #endif

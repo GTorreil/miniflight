@@ -41,10 +41,10 @@ float rc_to_normalized(uint16_t rc)
     return mapped;
 }
 
-void write_telemetry()
-{
-    crsf->telemetryWriteBattery(42.0f, 0.0f, 0.0f, 0.0f); // Debug -- TODO: get battery voltage
+void telem_write_battery(float voltage){
+    crsf->telemetryWriteBattery(voltage * 100.0F, 0.0f, 0.0f, 0.0f);
 }
+
 
 void setFailsafeValues()
 {
@@ -97,9 +97,6 @@ void onReceiveRcChannels(serialReceiverLayer::rcChannels_t *rcChannelsCrsf)
     {
         setFailsafeValues();
     }
-
-    // Send telemetry
-    write_telemetry();
 }
 
 void crsf_loop()
