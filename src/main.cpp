@@ -146,11 +146,11 @@ void update_rates_error()
 
 #pragma endregion
 
-#define ROLL_P 0.5f
-#define PITCH_P 0.5f
+#define ROLL_P 0.55f
+#define PITCH_P 0.75f
 #define YAW_P 0.5f
 
-#define LPF_ALPHA 0.1f
+#define LPF_ALPHA 0.025f
 
 float mix_out_aileron, mix_out_elevator, mix_out_throttle;
 
@@ -180,8 +180,8 @@ void mixer()
     const float new_throttle = rc_throttle + error_yaw * YAW_P;
 
     // Blend the new mixer outputs with the old ones
-    mix_out_aileron = low_pass_filter(new_aileron, mix_out_aileron, LPF_ALPHA);
-    mix_out_elevator = low_pass_filter(new_elevator, mix_out_elevator, LPF_ALPHA);
+    mix_out_aileron = exponential_moving_average(new_aileron, mix_out_aileron, LPF_ALPHA);
+    mix_out_elevator = exponential_moving_average(new_elevator, mix_out_elevator, LPF_ALPHA);
     mix_out_throttle = rc_throttle; // Pass the throttle as is
   }
   else
@@ -213,11 +213,22 @@ void set_outputs()
   }
 }
 
+void telemetry_loop()
+{
+  static unsigned long last_telemetry_time = 0;
+  if (millis() - last_telemetry_time < TELEMETRY_INTERVAL_MS)
+    return;
+
+  const float battery_voltage = battery_read_voltage();
+  telem_write_battery(battery_voltage);
+  // Serial.println(battery_voltage);
+}
+
 void loop()
 {
   // I/O Loop
   radio_loop();
-  battery_loop();
+  telemetry_loop();
   imu_loop();
 
   if (imu_has_new_data())
