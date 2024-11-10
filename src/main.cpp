@@ -10,6 +10,7 @@
 #include "radio/crsf/crsf.hpp"
 #include "utils/angles/angles.hpp"
 #include "utils/filters/filters.hpp"
+#include "bluetooth/bluetooth.hpp"
 
 void setup()
 {
@@ -20,6 +21,7 @@ void setup()
   }
   delay(1500); // Debug -- wait a bit for the serial monitor to attach.
 
+  bluetooth_setup();
   battery_init();
   crsf_init();
   imu_init();
@@ -227,6 +229,7 @@ void telemetry_loop()
 void loop()
 {
   // I/O Loop
+  bluetooth_loop();
   radio_loop();
   telemetry_loop();
   imu_loop();
