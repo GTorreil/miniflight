@@ -148,21 +148,23 @@ void update_rates_error()
 
 #pragma endregion
 
-#define ROLL_P 0.55f
-#define PITCH_P 0.75f
-#define YAW_P 0.5f
+#define ROLL_P 0.25f
+#define PITCH_P 0.30f
+#define YAW_P 0.25f
 
-#define LPF_ALPHA 0.025f
+#define LPF_ALPHA 0.015f
 
 float mix_out_aileron, mix_out_elevator, mix_out_throttle;
+// Store previous filtered errors
+float previous_filtered_error_roll = 0.0f;
+float previous_filtered_error_pitch = 0.0f;
+float previous_filtered_error_yaw = 0.0f;
 
 void mixer()
 {
-
   if (imu_available())
   {
-
-    // If stabilization is disabled, we assign RC channels directly.
+    // If stabilization is disabled, assign RC channels directly.
     if (rc_aux2 < -0.1f)
     {
       mix_out_aileron = rc_roll;
@@ -171,26 +173,29 @@ void mixer()
       return;
     }
 
-    // Normalize the errors so we can add them to the target angles
-    const float error_roll = error_rate_roll / ROLL_RATE_RAD;
-    const float error_pitch = error_rate_pitch / PITCH_RATE_RAD;
-    const float error_yaw = error_rate_yaw / YAW_RATE_RAD;
+    // Normalize the errors
+    const float normalized_error_roll = error_rate_roll / ROLL_RATE_RAD;
+    const float normalized_error_pitch = error_rate_pitch / PITCH_RATE_RAD;
+    const float normalized_error_yaw = error_rate_yaw / YAW_RATE_RAD;
 
-    // Compute new mixer outputs
-    const float new_aileron = rc_roll + error_roll * ROLL_P;
-    const float new_elevator = rc_pitch + error_pitch * PITCH_P;
-    const float new_throttle = rc_throttle + error_yaw * YAW_P;
+    // Apply filtering to the errors
+    const float filtered_error_roll = filter_exponential_moving_average(normalized_error_roll, previous_filtered_error_roll, LPF_ALPHA);
+    const float filtered_error_pitch = filter_exponential_moving_average(normalized_error_pitch, previous_filtered_error_pitch, LPF_ALPHA);
+    const float filtered_error_yaw = filter_exponential_moving_average(normalized_error_yaw, previous_filtered_error_yaw, LPF_ALPHA);
 
-    // Blend the new mixer outputs with the old ones
-    mix_out_aileron = exponential_moving_average(new_aileron, mix_out_aileron, LPF_ALPHA);
-    mix_out_elevator = exponential_moving_average(new_elevator, mix_out_elevator, LPF_ALPHA);
-    mix_out_throttle = rc_throttle; // Pass the throttle as is
+    // Update previous filtered errors
+    previous_filtered_error_roll = filtered_error_roll;
+    previous_filtered_error_pitch = filtered_error_pitch;
+    previous_filtered_error_yaw = filtered_error_yaw;
+
+    // Compute mixer outputs
+    mix_out_aileron = rc_roll + filtered_error_roll * ROLL_P;
+    mix_out_elevator = rc_pitch - filtered_error_pitch * PITCH_P; // Invert pitch to match the flight controller's orientation
+    mix_out_throttle = rc_throttle + filtered_error_yaw * YAW_P;
   }
   else
   {
-    // If we don't have an IMU, we can't stabilize the aircraft
-    // so we just pass the RC channels directly.
-
+    // If we don't have an IMU, pass the RC channels directly.
     mix_out_aileron = rc_roll;
     mix_out_elevator = rc_pitch;
     mix_out_throttle = rc_throttle;

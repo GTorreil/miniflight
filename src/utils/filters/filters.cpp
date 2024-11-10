@@ -13,9 +13,9 @@
  * @return The new EMA value, which is updated with the new input based on `alpha`.
  *
  * Example usage:
- * float ema_value = exponential_moving_average(new_sensor_value, previous_ema_value, 0.3f);
+ * float ema_value = filter_exponential_moving_average(new_sensor_value, previous_ema_value, 0.3f);
  */
-float exponential_moving_average(float new_value, float prev_ema, float alpha)
+float filter_exponential_moving_average(float new_value, float prev_ema, float alpha)
 {
     return alpha * new_value + (1.0f - alpha) * prev_ema;
 }
