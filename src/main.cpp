@@ -148,9 +148,9 @@ void update_rates_error()
 
 #pragma endregion
 
-#define ROLL_P 0.25f
-#define PITCH_P 0.30f
-#define YAW_P 0.25f
+#define ROLL_P 0.2f
+#define PITCH_P 0.25f
+#define YAW_P 0.2f
 
 #define LPF_ALPHA 0.015f
 
@@ -191,7 +191,7 @@ void mixer()
     // Compute mixer outputs
     mix_out_aileron = rc_roll + filtered_error_roll * ROLL_P;
     mix_out_elevator = rc_pitch - filtered_error_pitch * PITCH_P; // Invert pitch to match the flight controller's orientation
-    mix_out_throttle = rc_throttle + filtered_error_yaw * YAW_P;
+    mix_out_throttle = rc_throttle;                               // Pass the throttle as is
   }
   else
   {
