@@ -41,10 +41,10 @@ float rc_to_normalized(uint16_t rc)
     return mapped;
 }
 
-void telem_write_battery(float voltage){
+void telem_write_battery(float voltage)
+{
     crsf->telemetryWriteBattery(voltage * 100.0F, 0.0f, 0.0f, 0.0f);
 }
-
 
 void setFailsafeValues()
 {
@@ -109,8 +109,7 @@ void crsf_init()
     // Start with failsafe values
     setFailsafeValues();
 
-    Serial1.begin(400000, SERIAL_8N1, 20, 21);
-    crsf = new CRSFforArduino(&Serial1);
+    crsf = new CRSFforArduino(&Serial1, 20, 21);
 
     if (!crsf->begin())
     {
