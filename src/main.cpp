@@ -149,7 +149,7 @@ void update_rates_error()
 #pragma endregion
 
 #define ROLL_P 0.2f
-#define PITCH_P 0.25f
+#define PITCH_P 0.05f
 #define YAW_P 0.2f
 
 #define LPF_ALPHA 0.015f
