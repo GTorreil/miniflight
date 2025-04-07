@@ -11,7 +11,15 @@
 //
 #define PIN_ESC_1 4
 #define PIN_SERVO_ELEVATOR 2
-#define PIN_SERVO_AILERON 0
+#define PIN_SERVO_FLAPERON_0 0
+#define PIN_SERVO_FLAPERON_1 1
+
+//
+// Flaps
+//
+
+#define FLAP_MIN_ANGLE 0.0f
+#define FLAP_MAX_ANGLE 0.65f
 
 //
 // TELEMETRY

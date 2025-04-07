@@ -28,12 +28,20 @@ bool outputs_enabled()
     return false;
 }
 
-void servos_aileron_set_angle(uint8_t angle)
+void servos_flaperon_0_set_angle(uint8_t angle)
 {
     if (outputs_enabled() == false)
         return;
 
-    pwm.writeServo(PIN_SERVO_AILERON, angle);
+    pwm.writeServo(PIN_SERVO_FLAPERON_0, angle);
+}
+
+void servos_flaperon_1_set_angle(uint8_t angle)
+{
+    if (outputs_enabled() == false)
+        return;
+
+    pwm.writeServo(PIN_SERVO_FLAPERON_1, angle);
 }
 
 void servos_elevator_set_angle(uint8_t angle)
